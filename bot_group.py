@@ -70,14 +70,14 @@ def getter():
         try:
             for event in longpoll.listen():
                 if event.type == VkBotEventType.MESSAGE_NEW:
-
-                    text = event.obj["text"].replace(' \n', ' ')
+                    print(event.obj["message"]["text"])
+                    text = event.obj['message']['text'].replace(' \n', ' ')
                     text = text.replace('\n', ' ')
                     text = text.split(' ')
 
                     if text[0] not in c.DEMOTIVATOR:
 
-                        if len(event.obj["text"]) >= 1:
+                        if len(event.obj['message']['text']) >= 1:
                             print(f"[Getter]: Обнаружен текст")
 
                             if len(text) <= 3:
@@ -100,10 +100,10 @@ def getter():
                         else:
                             print(f"[Getter]: Текст не обнаружен")
 
-                        if len(event.object['attachments']) >= 1:
+                        if len(event.object['message']['attachments']) >= 1:
                             print("[Getter]: Обнаружено вложение")
                             index = 1
-                            for photo in event.object['attachments']:
+                            for photo in event.object['message']['attachments']:
                                 if 'photo' in photo['type']:
                                     max_photo = photo['photo']['sizes'][len(photo['photo']['sizes']) - 1]['url']
                                     if max_photo not in photos:
@@ -126,7 +126,7 @@ def sender():
             for event in longpoll.listen():
                 if event.type == VkBotEventType.MESSAGE_NEW:
 
-                    text = event.obj["text"].split(' ')
+                    text = event.obj['message']['text'].split(' ')
                     if text[0] not in c.DEMOTIVATOR:
 
                         if len(words) >= 15 and len(photos) >= 2:
@@ -154,12 +154,12 @@ def sender():
                                 str_1 = ' '.join(msg_1)
                                 str_2 = ' '.join(msg_2)
 
-                                name = f'{event.object.from_id}-{random.randint(1, 999999999)}'
+                                name = f'{event.object["message"]["from_id"]}-{random.randint(1, 999999999)}'
                                 photo_link = random.choice(photos)
                                 creator(photo_link, str_1, str_2, name)
 
                                 result = upload_photo(name)
-                                vk.method("messages.send", {"peer_id": event.obj.peer_id, "attachment": result, "random_id": 0})
+                                vk.method("messages.send", {"peer_id": event.obj['message']['peer_id'], "attachment": result, "random_id": 0})
                                 os.remove(f'files/{name}.png')
                                 print("[Sender]: Сообщение отправлено")
                         else:
@@ -173,19 +173,19 @@ def commander():
         try:
             for event in longpoll.listen():
                 if event.type == VkBotEventType.MESSAGE_NEW:
-                    split_text = event.object.text.split(' \n')
+                    split_text = event.obj['message']['text'].split(' \n')
 
                     if split_text[0] in c.DEMOTIVATOR and len(split_text) == 3:
-                        if len(event.object['attachments']) >= 1:
-                            if 'photo' in event.object['attachments'][0]['type']:
-                                photos = event.object['attachments'][0]['photo']['sizes']
+                        if len(event.object['message']['attachments']) >= 1:
+                            if 'photo' in event.object['message']['attachments'][0]['type']:
+                                photos = event.object['message']['attachments'][0]['photo']['sizes']
                                 photo_link = photos[len(photos) - 1]['url']
-                                name = f'{event.object.from_id}-{random.randint(1, 999999999)}'
+                                name = f'{event.object["message"]["from_id"]}-{random.randint(1, 999999999)}'
 
                                 creator(photo_link, split_text[1], split_text[2], name)
 
                                 result = upload_photo(name)
-                                vk.method("messages.send", {"peer_id": event.obj.peer_id, "attachment": result, "random_id": 0})
+                                vk.method("messages.send", {"peer_id": event.obj['message']['peer_id'], "attachment": result, "random_id": 0})
                                 os.remove(f'files/{name}.png')
         except Exception as e:
             print(repr(e))
